@@ -293,6 +293,10 @@ bool qt_mac_is_macsheet(const QWidget *w)
     if (!w)
         return false;
 
+#ifdef QT_BLIZZARD_MAC_SHEETS_PATCH
+    if (w->windowType() != Qt::Sheet && QApplication::testAttribute(Qt::AA_MacDontUseSheets))
+        return false;
+#endif
     Qt::WindowModality modality = w->windowModality();
     if (modality == Qt::ApplicationModal)
         return false;

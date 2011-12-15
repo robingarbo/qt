@@ -50,6 +50,10 @@ QT_BEGIN_NAMESPACE
 
 QT_MODULE(Core)
 
+#ifdef Q_OS_MAC
+#define QT_BLIZZARD_MAC_SHEETS_PATCH
+#endif
+
 #ifndef Q_MOC_RUN
 namespace
 #else
@@ -547,6 +551,9 @@ public:
         AA_S60DisablePartialScreenInputMode = 9,
         AA_X11InitThreads = 10,
         AA_CaptureMultimediaKeys = 11,
+#ifdef QT_BLIZZARD_MAC_SHEETS_PATCH
+        AA_MacDontUseSheets = 12,
+#endif
 
         // Add new attributes before this line
         AA_AttributeCount
