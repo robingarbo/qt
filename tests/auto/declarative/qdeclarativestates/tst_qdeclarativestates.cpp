@@ -114,6 +114,7 @@ private slots:
     void signalOverrideCrash();
     void signalOverrideCrash2();
     void signalOverrideCrash3();
+    void signalOverrideCrash4();
     void parentChange();
     void parentChangeErrors();
     void anchorChanges();
@@ -533,6 +534,82 @@ void tst_qdeclarativestates::signalOverrideCrash3()
     QDeclarativeItemPrivate::get(rect)->setState("");
     QDeclarativeItemPrivate::get(rect)->setState("state2");
     QDeclarativeItemPrivate::get(rect)->setState("");
+
+    delete rect;
+}
+
+/*
+ * It appears that the old ownership model selected for signal expressions 
+ * attached to states did not account for certain cases.  In particular a signal 
+ * owns its current expression.  A state owns an expression that the signal had 
+ * just before we entered this state.  But when we enter a state an expression 
+ * been set for a signal is the initial expression for this particular state, 
+ * not an expression owned by this state.  This would cause all kind of errors 
+ * in a particularly complex case.  Here is an explanation of what happens under 
+ * the old ownership model (see data/signalOverrideCrash4.qml):
+ *
+ * Lets give our expressions ids:
+ *   0x1 : console.log("state1")
+ *   0x2 : console.log("state2")
+ *
+ * Initially:
+ *      Rectangle.onHeightChanged: <no expression>
+ *      Rectangle.state1
+ *          expression: 0x1
+ *          owns: <nothing>
+ *      Rectangle.state2
+ *          expression: 0x2
+ *          owns: <nothing>
+ *
+ * Enter state1:
+ *      Rectangle.onHeightChanged: 0x1
+ *      Rectangle.state1
+ *          expression: 0x1
+ *          owns: <nothing>
+ *      Rectangle.state2
+ *          expression: 0x2
+ *          owns: <nothing>
+ *
+ * Enter state2:
+ *      Rectangle.onHeightChanged: 0x2
+ *      Rectangle.state1
+ *          expression: 0x1
+ *          owns: <nothing>
+ *      Rectangle.state2
+ *          expression: 0x2
+ *          owns: 0x1
+ *
+ * state2 now own expression that "conceptually" belongs to state1 and might 
+ * still be set by state1.
+ *
+ * Enter state1:
+ *      Rectangle.onHeightChanged: 0x1
+ *      Rectangle.state1
+ *          expression: 0x1
+ *          owns: 0x2
+ *      Rectangle.state2
+ *          expression: 0x2
+ *          owns: 0x1
+ *
+ * Now we have everything mixed up.  States owns each others expression and in 
+ * addition to that the rectangle's signal also owns one of the expression.  If 
+ * we delete the rectangle the 0x1 expression would be deleted twice.
+ *
+ * Note that in addition to the crazy mix ups unless we enter a state at least 
+ * once we would leak all the signal expressions for that state.  I am not sure 
+ * how to check for leaks here.
+ */
+void tst_qdeclarativestates::signalOverrideCrash4()
+{
+    QDeclarativeEngine engine;
+
+    QDeclarativeComponent rectComponent(&engine, SRCDIR "/data/signalOverrideCrash4.qml");
+    QDeclarativeRectangle *rect = qobject_cast<QDeclarativeRectangle*>(rectComponent.create());
+    QVERIFY(rect != 0);
+
+    QDeclarativeItemPrivate::get(rect)->setState("state1");
+    QDeclarativeItemPrivate::get(rect)->setState("state2");
+    QDeclarativeItemPrivate::get(rect)->setState("state1");
 
     delete rect;
 }

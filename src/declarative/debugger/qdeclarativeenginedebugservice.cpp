@@ -56,6 +56,7 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qmetaobject.h>
+#include <QtCore/QSharedPointer>
 
 QT_BEGIN_NAMESPACE
 
@@ -221,7 +222,7 @@ void QDeclarativeEngineDebugService::buildObjectDump(QDataStream &message,
             QDeclarativeObjectProperty prop;
             prop.type = QDeclarativeObjectProperty::SignalProperty;
             prop.hasNotifySignal = false;
-            QDeclarativeExpression *expr = signal->expression();
+            QSharedPointer<QDeclarativeExpression> expr = signal->expression();
             if (expr) {
                 prop.value = expr->expression();
                 QObject *scope = expr->scopeObject();
@@ -587,7 +588,7 @@ void QDeclarativeEngineDebugService::setBinding(int objectId,
                 if (isLiteralValue) {
                     property.write(expression);
                 } else if (hasValidSignal(object, propertyName)) {
-                    QDeclarativeExpression *declarativeExpression = new QDeclarativeExpression(context, object, expression.toString());
+                    QSharedPointer<QDeclarativeExpression> declarativeExpression(new QDeclarativeExpression(context, object, expression.toString()));
                     QDeclarativePropertyPrivate::setSignalExpression(property, declarativeExpression);
                     declarativeExpression->setSourceLocation(filename, line);
                 } else if (property.isProperty()) {
@@ -655,7 +656,7 @@ void QDeclarativeEngineDebugService::resetBinding(int objectId, const QString &p
             }
         } else if (hasValidSignal(object, propertyName)) {
             QDeclarativeProperty property(object, propertyName, context);
-            QDeclarativePropertyPrivate::setSignalExpression(property, 0);
+            QDeclarativePropertyPrivate::setSignalExpression(property, QSharedPointer<QDeclarativeExpression>());
     } else {
             if (QDeclarativePropertyChanges *propertyChanges = qobject_cast<QDeclarativePropertyChanges *>(object)) {
                 propertyChanges->removeProperty(propertyName);

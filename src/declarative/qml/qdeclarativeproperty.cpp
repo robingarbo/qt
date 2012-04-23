@@ -56,6 +56,8 @@
 #include "private/qdeclarativevmemetaobject_p.h"
 
 #include <QStringList>
+#include <QtCore/QSharedPointer>
+
 #include <QtCore/qdebug.h>
 
 #include <math.h>
@@ -853,11 +855,11 @@ QDeclarativePropertyPrivate::setBindingNoEnable(QObject *object, int coreIndex, 
     Returns the expression associated with this signal property, or 0 if no 
     signal expression exists.
 */
-QDeclarativeExpression *
+QSharedPointer<QDeclarativeExpression>
 QDeclarativePropertyPrivate::signalExpression(const QDeclarativeProperty &that)
 {
     if (!(that.type() & QDeclarativeProperty::SignalProperty))
-        return 0;
+        return QSharedPointer<QDeclarativeExpression>();
 
     const QObjectList &children = that.d->object->children();
     
@@ -869,27 +871,22 @@ QDeclarativePropertyPrivate::signalExpression(const QDeclarativeProperty &that)
             return signal->expression();
     }
 
-    return 0;
+    return QSharedPointer<QDeclarativeExpression>();
 }
 
 /*!
     Set the signal expression associated with this signal property to \a expr.
     Returns the existing signal expression (if any), otherwise 0.
-
-    Ownership of \a expr transfers to QML.  Ownership of the return value is
-    assumed by the caller.
 */
-QDeclarativeExpression *
+QSharedPointer<QDeclarativeExpression>
 QDeclarativePropertyPrivate::setSignalExpression(const QDeclarativeProperty &that,
-                                                     QDeclarativeExpression *expr) 
+                                                 QSharedPointer<QDeclarativeExpression> expr) 
 {
-    if (!(that.type() & QDeclarativeProperty::SignalProperty)) {
-        delete expr;
-        return 0;
-    }
+    if (!(that.type() & QDeclarativeProperty::SignalProperty))
+        return QSharedPointer<QDeclarativeExpression>();
 
     const QObjectList &children = that.d->object->children();
-    
+
     for (int ii = 0; ii < children.count(); ++ii) {
         QObject *child = children.at(ii);
 
@@ -902,7 +899,7 @@ QDeclarativePropertyPrivate::setSignalExpression(const QDeclarativeProperty &tha
         QDeclarativeBoundSignal *signal = new QDeclarativeBoundSignal(that.d->object, that.method(), that.d->object);
         return signal->setExpression(expr);
     } else {
-        return 0;
+        return QSharedPointer<QDeclarativeExpression>();
     }
 }
 

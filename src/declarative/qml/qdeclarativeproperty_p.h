@@ -55,6 +55,8 @@
 
 #include "qdeclarativeproperty.h"
 
+#include <QtCore/QSharedPointer>
+
 #include <private/qobject_p.h>
 #include <private/qdeclarativeglobal_p.h>
 #include <private/qdeclarativepropertycache_p.h>
@@ -127,9 +129,9 @@ public:
     static QDeclarativeAbstractBinding *setBinding(const QDeclarativeProperty &that,
                                                    QDeclarativeAbstractBinding *,
                                                    WriteFlags flags = DontRemoveBinding);
-    static QDeclarativeExpression *signalExpression(const QDeclarativeProperty &that);
-    static QDeclarativeExpression *setSignalExpression(const QDeclarativeProperty &that, 
-                                                       QDeclarativeExpression *) ;
+    static QSharedPointer<QDeclarativeExpression> signalExpression(const QDeclarativeProperty &that);
+    static QSharedPointer<QDeclarativeExpression> setSignalExpression(const QDeclarativeProperty &that, 
+                                                                      QSharedPointer<QDeclarativeExpression> expr);
     static bool write(const QDeclarativeProperty &that, const QVariant &, WriteFlags);
     static int valueTypeCoreIndex(const QDeclarativeProperty &that);
     static int bindingIndex(const QDeclarativeProperty &that);

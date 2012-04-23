@@ -50,6 +50,7 @@
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qstringlist.h>
+#include <QtCore/QSharedPointer>
 
 #include <private/qobject_p.h>
 
@@ -260,7 +261,7 @@ void QDeclarativeConnections::connectSignals()
         if (prop.isValid() && (prop.type() & QDeclarativeProperty::SignalProperty)) {
             QDeclarativeBoundSignal *signal =
                 new QDeclarativeBoundSignal(target(), prop.method(), this);
-            QDeclarativeExpression *expression = new QDeclarativeExpression(qmlContext(this), 0, script);
+            QSharedPointer<QDeclarativeExpression> expression(new QDeclarativeExpression(qmlContext(this), 0, script));
             QDeclarativeData *ddata = QDeclarativeData::get(this);
             if (ddata && ddata->outerContext && !ddata->outerContext->url.isEmpty())
                 expression->setSourceLocation(ddata->outerContext->url.toString(), ddata->lineNumber);
