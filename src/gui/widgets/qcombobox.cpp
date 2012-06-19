@@ -3073,6 +3073,15 @@ void QComboBox::keyReleaseEvent(QKeyEvent *e)
 void QComboBox::wheelEvent(QWheelEvent *e)
 {
     Q_D(QComboBox);
+
+    // If the combo box does not have focus, the mouse wheel event should not be
+    // consumed by the combobox.
+    if (!hasFocus())
+    {
+        e->ignore();
+        return;
+    }
+
     if (!d->viewContainer()->isVisible()) {
         int newIndex = currentIndex();
 
