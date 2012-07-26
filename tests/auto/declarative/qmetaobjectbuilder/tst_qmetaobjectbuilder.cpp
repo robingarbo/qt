@@ -42,6 +42,9 @@
 #include <QtTest/QtTest>
 #include <QtCore/qlocale.h>
 #include <private/qmetaobjectbuilder_p.h>
+#include <QDeclarativeEngine>
+#include <QDeclarativeComponent>
+#include <QDeclarativeItem>
 
 class tst_QMetaObjectBuilder : public QObject
 {
@@ -70,12 +73,16 @@ private slots:
     void serialize();
     void removeNotifySignal();
 
+    void aliasUserItemInNamespace();
+
 private:
     static bool checkForSideEffects
         (const QMetaObjectBuilder& builder,
          QMetaObjectBuilder::AddMembers members);
     static bool sameMetaObject
         (const QMetaObject *meta1, const QMetaObject *meta2);
+
+    QDeclarativeEngine engine;
 };
 
 // Dummy class that has something of every type of thing moc can generate.
@@ -1261,6 +1268,42 @@ bool tst_QMetaObjectBuilder::sameMetaObject
     }
 
     return true;
+}
+
+namespace TestNameSpace {
+
+class UserItem : public QDeclarativeItem
+{
+    Q_OBJECT
+public:
+    UserItem(QDeclarativeItem* parent = NULL) : QDeclarativeItem(parent) {}
+};
+
+} // namespace TestNameSpace
+
+QML_DECLARE_TYPE(TestNameSpace::UserItem);
+
+
+// Makes sure that an alias property in QML may refere to an item implemented in 
+// C++ in a namespace.  It used to be a QMetaObjectBuilder bug.
+void tst_QMetaObjectBuilder::aliasUserItemInNamespace()
+{
+    qmlRegisterType<TestNameSpace::UserItem>("Test", 1, 0, "UserItem");
+
+    QString qml = "import QtQuick 1.0\n";
+            qml+= "import Test 1.0\n";
+            qml+= "\n";
+            qml+= "Item {\n";
+            qml+= "    property alias test1: userItem\n";
+            qml+= "\n";
+            qml+= "    UserItem {\n";
+            qml+= "        id: userItem\n";
+            qml+= "    }\n";
+            qml+= "}\n";
+
+    QByteArray qmlData = qml.toUtf8();
+    QDeclarativeComponent component(&engine);
+    component.setData(qmlData, QUrl::fromLocalFile("dummy.qml"));
 }
 
 QTEST_MAIN(tst_QMetaObjectBuilder)

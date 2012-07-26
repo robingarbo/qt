@@ -1511,6 +1511,7 @@ void QMetaObjectBuilder::fromRelocatableData(QMetaObject *output,
     output->d.superdata = superclass;
     output->d.stringdata = buf + stringdataOffset;
     output->d.data = reinterpret_cast<const uint *>(buf + dataOffset);
+    output->d.extradata = 0;
 }
 
 /*!
