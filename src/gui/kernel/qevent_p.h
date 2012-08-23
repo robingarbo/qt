@@ -79,6 +79,14 @@ protected:
     quint32 nVirtualKey;
     quint32 nModifiers;
     friend class QKeyEvent;
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    void* mac_event;
+public:
+    void SetMacNativeEvent(void* event)
+    {
+        mac_event = event;
+    }
+#endif
 };
 
 // ### Qt 5: remove

@@ -60,6 +60,10 @@
 class RFile;
 #endif
 
+#ifdef Q_OS_MAC
+#define QT_BLIZZARD_COCOA_KEY_EVENT
+#endif
+
 QT_BEGIN_HEADER
 
 QT_BEGIN_NAMESPACE
@@ -262,6 +266,10 @@ public:
     { return (txt.length() ? txt.unicode()->toLatin1() : 0); }
     inline QT3_SUPPORT Qt::ButtonState state() const { return Qt::ButtonState(QInputEvent::modifiers()); }
     inline QT3_SUPPORT Qt::ButtonState stateAfter() const { return Qt::ButtonState(modifiers()); }
+#endif
+
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    void* mac_event();
 #endif
 
 protected:

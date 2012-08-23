@@ -761,6 +761,13 @@ static bool mustUseCocoaKeyEvent()
     return TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData) == 0;
 }
 
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+bool isCapsLockEnabled(ulong modifierFlags)
+{
+    return modifierFlags & NSAlphaShiftKeyMask;
+}
+#endif
+
 bool qt_dispatchKeyEventWithCocoa(void * /*NSEvent * */ keyEvent, QWidget *widgetToGetEvent)
 {
     NSEvent *event = static_cast<NSEvent *>(keyEvent);
@@ -785,11 +792,20 @@ bool qt_dispatchKeyEventWithCocoa(void * /*NSEvent * */ keyEvent, QWidget *widge
     // can be done for now because of the Control/Meta mapping issues
     // (we always get text on the Mac)
     if (!ignoreText && !(keyMods & (Qt::ControlModifier | Qt::MetaModifier)))
+    {
         text = QCFString::toQString(reinterpret_cast<CFStringRef>(keyChars));
-
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+        if (isCapsLockEnabled([event modifierFlags]))
+            text = text.toUpper();
+#endif
+    }
+    
     UInt32 macScanCode = 1;
     QKeyEventEx ke(cocoaEvent2QtEvent([event type]), qtKey, keyMods, text, [event isARepeat], qMax(1, keyLength),
                    macScanCode, [event keyCode], [event modifierFlags]);
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    ke.SetMacNativeEvent(event);
+#endif
     return qt_sendSpontaneousEvent(widgetToGetEvent, &ke) && ke.isAccepted();
 }
 #endif
@@ -833,11 +849,15 @@ bool qt_dispatchKeyEvent(void * /*NSEvent * */ keyEvent, QWidget *widgetToGetEve
     if (qt_mac_sendMacEventToWidget(widgetToGetEvent, key_event))
         return true;
 
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    return qt_dispatchKeyEventWithCocoa(keyEvent, widgetToGetEvent);
+#else
     if (mustUseCocoaKeyEvent())
         return qt_dispatchKeyEventWithCocoa(keyEvent, widgetToGetEvent);
 
     bool consumed = qt_keymapper_private()->translateKeyEvent(widgetToGetEvent, 0, key_event, &info, true);
     return consumed && (info != 0);
+#endif
 #endif
 }
 
