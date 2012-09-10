@@ -316,6 +316,10 @@ void QLabelPrivate::init()
 
     openExternalLinks = false;
 
+#ifdef QT_BLIZZARD_LABEL_OPACITY
+    labelOpacity = 1.0f;
+#endif
+
     setLayoutItemMargins(QStyle::SE_LabelLayoutItem);
 }
 
@@ -1080,6 +1084,10 @@ void QLabel::paintEvent(QPaintEvent *)
     Q_D(QLabel);
     QStyle *style = QWidget::style();
     QPainter painter(this);
+
+#ifdef QT_BLIZZARD_LABEL_OPACITY
+    painter.setOpacity(d->labelOpacity);
+#endif
     drawFrame(&painter);
     QRect cr = contentsRect();
     cr.adjust(d->margin, d->margin, -d->margin, -d->margin);
@@ -1507,6 +1515,31 @@ void QLabel::setScaledContents(bool enable)
     }
     update(contentsRect());
 }
+
+#ifdef QT_BLIZZARD_LABEL_OPACITY
+double QLabel::labelOpacity() const
+{
+    Q_D(const QLabel);
+    return d->labelOpacity;
+}
+
+void QLabel::setLabelOpacity(double opacity)
+{
+    Q_D(QLabel);
+
+    if (opacity == d->labelOpacity)
+        return;
+
+    if (opacity<0.0) {
+        opacity = 0.0;
+    } else if (opacity>1.0) {
+        opacity = 1.0;
+    }
+
+    d->labelOpacity = opacity;
+    d->updateLabel();
+}
+#endif
 
 Qt::LayoutDirection QLabelPrivate::textDirection() const
 {

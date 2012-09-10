@@ -145,6 +145,10 @@ public:
     QCursor cursor;
 #endif
 
+#ifdef QT_BLIZZARD_LABEL_OPACITY
+    double labelOpacity;
+#endif
+
     friend class QMessageBoxPrivate;
 };
 
