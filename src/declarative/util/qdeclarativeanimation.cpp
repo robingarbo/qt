@@ -283,6 +283,10 @@ void QDeclarativeAbstractAnimation::componentComplete()
 {
     Q_D(QDeclarativeAbstractAnimation);
     d->componentComplete = true;
+    if (d->running) {
+        d->running = false;
+        setRunning(true);
+    }
 }
 
 void QDeclarativeAbstractAnimation::componentFinalized()
