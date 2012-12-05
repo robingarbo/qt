@@ -71,6 +71,7 @@
 #include <QtCore/qvarlengtharray.h>
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qdatetime.h>
+#include <QtCore/QSharedPointer>
 
 QT_BEGIN_NAMESPACE
 
@@ -714,10 +715,9 @@ QObject *QDeclarativeVME::run(QDeclarativeVMEObjectStack &stack,
                 QMetaMethod signal = target->metaObject()->method(instr.storeSignal.signalIndex);
 
                 QDeclarativeBoundSignal *bs = new QDeclarativeBoundSignal(target, signal, target);
-                QDeclarativeExpression *expr = 
-                    new QDeclarativeExpression(ctxt, context, primitives.at(instr.storeSignal.value));
+                QSharedPointer<QDeclarativeExpression> expr(new QDeclarativeExpression(ctxt, context, primitives.at(instr.storeSignal.value)));
                 expr->setSourceLocation(comp->name, instr.line);
-                static_cast<QDeclarativeExpressionPrivate *>(QObjectPrivate::get(expr))->name = datas.at(instr.storeSignal.name);
+                static_cast<QDeclarativeExpressionPrivate *>(QObjectPrivate::get(expr.data()))->name = datas.at(instr.storeSignal.name);
                 bs->setExpression(expr);
             }
             break;

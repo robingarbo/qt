@@ -97,7 +97,7 @@ QDeclarativeAbstractBoundSignal::~QDeclarativeAbstractBoundSignal()
 
 QDeclarativeBoundSignal::QDeclarativeBoundSignal(QObject *scope, const QMetaMethod &signal, 
                                QObject *parent)
-: m_expression(0), m_signal(signal), m_paramsValid(false), m_isEvaluating(false), m_params(0)
+: m_signal(signal), m_paramsValid(false), m_isEvaluating(false), m_params(0)
 {
     // This is thread safe.  Although it may be updated by two threads, they
     // will both set it to the same value - so the worst thing that can happen
@@ -111,7 +111,7 @@ QDeclarativeBoundSignal::QDeclarativeBoundSignal(QObject *scope, const QMetaMeth
 QDeclarativeBoundSignal::QDeclarativeBoundSignal(QDeclarativeContext *ctxt, const QString &val, 
                                QObject *scope, const QMetaMethod &signal,
                                QObject *parent)
-: m_expression(0), m_signal(signal), m_paramsValid(false), m_isEvaluating(false), m_params(0)
+: m_signal(signal), m_paramsValid(false), m_isEvaluating(false), m_params(0)
 {
     // This is thread safe.  Although it may be updated by two threads, they
     // will both set it to the same value - so the worst thing that can happen
@@ -121,13 +121,11 @@ QDeclarativeBoundSignal::QDeclarativeBoundSignal(QDeclarativeContext *ctxt, cons
     QDeclarative_setParent_noEvent(this, parent);
     QDeclarativePropertyPrivate::connect(scope, m_signal.methodIndex(), this, evaluateIdx);
 
-    m_expression = new QDeclarativeExpression(ctxt, scope, val);
+    m_expression = QSharedPointer<QDeclarativeExpression>(new QDeclarativeExpression(ctxt, scope, val));
 }
 
 QDeclarativeBoundSignal::~QDeclarativeBoundSignal()
 {
-    delete m_expression;
-    m_expression = 0;
 }
 
 int QDeclarativeBoundSignal::index() const 
@@ -138,7 +136,7 @@ int QDeclarativeBoundSignal::index() const
 /*!
     Returns the signal expression.
 */
-QDeclarativeExpression *QDeclarativeBoundSignal::expression() const
+const QSharedPointer<QDeclarativeExpression> &QDeclarativeBoundSignal::expression() const
 {
     return m_expression;
 }
@@ -150,9 +148,9 @@ QDeclarativeExpression *QDeclarativeBoundSignal::expression() const
     The QDeclarativeBoundSignal instance takes ownership of \a e.  The caller is 
     assumes ownership of the returned QDeclarativeExpression.
 */
-QDeclarativeExpression *QDeclarativeBoundSignal::setExpression(QDeclarativeExpression *e)
+QSharedPointer<QDeclarativeExpression> QDeclarativeBoundSignal::setExpression(QSharedPointer<QDeclarativeExpression> e)
 {
-    QDeclarativeExpression *rv = m_expression;
+    QSharedPointer<QDeclarativeExpression> rv = m_expression;
     m_expression = e;
     if (m_expression) m_expression->setNotifyOnValueChanged(false);
     return rv;
@@ -183,7 +181,7 @@ int QDeclarativeBoundSignal::qt_metacall(QMetaObject::Call c, int id, void **a)
 
         if (m_params) m_params->setValues(a);
         if (m_expression && m_expression->engine()) {
-            QDeclarativeExpressionPrivate::get(m_expression)->value(m_params);
+            QDeclarativeExpressionPrivate::get(m_expression.data())->value(m_params);
             if (m_expression && m_expression->hasError())
                 QDeclarativeEnginePrivate::warning(m_expression->engine(), m_expression->error());
         }

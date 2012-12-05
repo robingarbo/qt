@@ -826,6 +826,9 @@ QKeyEventEx::QKeyEventEx(Type type, int key, Qt::KeyboardModifiers modifiers,
       nScanCode(nativeScanCode), nVirtualKey(nativeVirtualKey), nModifiers(nativeModifiers)
 {
     d = reinterpret_cast<QEventPrivate*>(this);
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    mac_event = 0;
+#endif
 }
 
 /*!
@@ -837,6 +840,9 @@ QKeyEventEx::QKeyEventEx(const QKeyEventEx &other)
       nScanCode(other.nScanCode), nVirtualKey(other.nVirtualKey), nModifiers(other.nModifiers)
 {
     d = reinterpret_cast<QEventPrivate*>(this);
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+    mac_event = other.mac_event;
+#endif
 }
 
 /*!
@@ -1017,6 +1023,14 @@ bool QKeyEvent::matches(QKeySequence::StandardKey matchKey) const
 
     Use modifiers() instead.
 */
+#endif
+
+#ifdef QT_BLIZZARD_COCOA_KEY_EVENT
+void* QKeyEvent::mac_event()
+{
+    return (reinterpret_cast<const QKeyEvent*>(d) != this
+            ? 0 : reinterpret_cast<const QKeyEventEx*>(this)->mac_event);
+}
 #endif
 
 /*!

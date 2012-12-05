@@ -45,6 +45,7 @@
 #include <QtDeclarative/private/qdeclarativeproperty_p.h>
 #include <private/qdeclarativebinding_p.h>
 #include <QtGui/QLineEdit>
+#include <QtCore/QSharedPointer>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdir.h>
 
@@ -178,7 +179,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty()
     QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
     QVERIFY(binding == 0);
     QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-    QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+    QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
     QVERIFY(expression == 0);
     QCOMPARE(prop.index(), -1);
     QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -275,7 +276,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), -1);
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -324,7 +325,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object()
         QVERIFY(binding != 0);
         QVERIFY(QDeclarativePropertyPrivate::binding(prop) == binding.data());
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression)) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfProperty("defaultProperty"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -376,7 +377,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), -1);
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -425,7 +426,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string()
         QVERIFY(binding != 0);
         QVERIFY(QDeclarativePropertyPrivate::binding(prop) == binding.data());
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfProperty("defaultProperty"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -472,9 +473,9 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression != 0);
-        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression.data());
+        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfMethod("clicked()"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
 
@@ -520,9 +521,9 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression != 0);
-        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression.data());
+        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfMethod("oddlyNamedNotifySignal()"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
 
@@ -573,7 +574,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_context()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), -1);
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -622,7 +623,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_context()
         QVERIFY(binding != 0);
         QVERIFY(QDeclarativePropertyPrivate::binding(prop) == binding.data());
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfProperty("defaultProperty"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -674,7 +675,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string_context()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression)) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), -1);
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -723,7 +724,7 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string_context()
         QVERIFY(binding != 0);
         QVERIFY(QDeclarativePropertyPrivate::binding(prop) == binding.data());
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression == 0);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfProperty("defaultProperty"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
@@ -770,9 +771,9 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string_context()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression)) == 0);
         QVERIFY(expression != 0);
-        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression.data());
+        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfMethod("clicked()"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
 
@@ -818,9 +819,9 @@ void tst_qdeclarativeproperty::qmlmetaproperty_object_string_context()
         QVERIFY(QDeclarativePropertyPrivate::setBinding(prop, binding.data()) == 0);
         QVERIFY(binding == 0);
         QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == 0);
-        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression.data()) == 0);
+        QVERIFY(QDeclarativePropertyPrivate::setSignalExpression(prop, expression) == 0);
         QVERIFY(expression != 0);
-        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression.data());
+        QVERIFY(QDeclarativePropertyPrivate::signalExpression(prop) == expression);
         QCOMPARE(prop.index(), dobject.metaObject()->indexOfMethod("oddlyNamedNotifySignal()"));
         QCOMPARE(QDeclarativePropertyPrivate::valueTypeCoreIndex(prop), -1);
 

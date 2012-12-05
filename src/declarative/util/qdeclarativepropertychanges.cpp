@@ -57,6 +57,8 @@
 #include <qdeclarativecontext_p.h>
 #include <qdeclarativestate_p_p.h>
 
+#include <QtCore/QSharedPointer>
+
 #include <QtCore/qdebug.h>
 
 #include <private/qobject_p.h>
@@ -139,31 +141,20 @@ QT_BEGIN_NAMESPACE
 class QDeclarativeReplaceSignalHandler : public QDeclarativeActionEvent
 {
 public:
-    QDeclarativeReplaceSignalHandler() : expression(0), reverseExpression(0),
-                                rewindExpression(0), ownedExpression(0) {}
-    ~QDeclarativeReplaceSignalHandler() {
-        delete ownedExpression;
-    }
-
     virtual QString typeName() const { return QLatin1String("ReplaceSignalHandler"); }
 
     QDeclarativeProperty property;
-    QDeclarativeExpression *expression;
-    QDeclarativeExpression *reverseExpression;
-    QDeclarativeExpression *rewindExpression;
-    QDeclarativeGuard<QDeclarativeExpression> ownedExpression;
+    QSharedPointer<QDeclarativeExpression> expression;
+    QSharedPointer<QDeclarativeExpression> reverseExpression;
+    QSharedPointer<QDeclarativeExpression> rewindExpression;
 
     virtual void execute(Reason) {
-        ownedExpression = QDeclarativePropertyPrivate::setSignalExpression(property, expression);
-        if (ownedExpression == expression)
-            ownedExpression = 0;
+        QDeclarativePropertyPrivate::setSignalExpression(property, expression);
     }
 
     virtual bool isReversable() { return true; }
     virtual void reverse(Reason) {
-        ownedExpression = QDeclarativePropertyPrivate::setSignalExpression(property, reverseExpression);
-        if (ownedExpression == reverseExpression)
-            ownedExpression = 0;
+        QDeclarativePropertyPrivate::setSignalExpression(property, reverseExpression);
     }
 
     virtual void saveOriginals() {
@@ -179,16 +170,10 @@ public:
         if (rsh == this)
             return;
         reverseExpression = rsh->reverseExpression;
-        if (rsh->ownedExpression == reverseExpression) {
-            ownedExpression = rsh->ownedExpression;
-            rsh->ownedExpression = 0;
-        }
     }
 
     virtual void rewind() {
-        ownedExpression = QDeclarativePropertyPrivate::setSignalExpression(property, rewindExpression);
-        if (ownedExpression == rewindExpression)
-            ownedExpression = 0;
+        QDeclarativePropertyPrivate::setSignalExpression(property, rewindExpression);
     }
     virtual void saveCurrentValues() { 
         rewindExpression = QDeclarativePropertyPrivate::signalExpression(property);
@@ -336,7 +321,7 @@ void QDeclarativePropertyChangesPrivate::decode()
 
         QDeclarativeProperty prop = property(name);      //### better way to check for signal property?
         if (prop.type() & QDeclarativeProperty::SignalProperty) {
-            QDeclarativeExpression *expression = new QDeclarativeExpression(qmlContext(q), object, data.toString());
+            QSharedPointer<QDeclarativeExpression> expression(new QDeclarativeExpression(qmlContext(q), object, data.toString()));
             QDeclarativeData *ddata = QDeclarativeData::get(q);
             if (ddata && ddata->outerContext && !ddata->outerContext->url.isEmpty())
                 expression->setSourceLocation(ddata->outerContext->url.toString(), ddata->lineNumber);

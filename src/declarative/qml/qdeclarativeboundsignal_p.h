@@ -56,6 +56,7 @@
 #include "qdeclarativeexpression.h"
 
 #include <QtCore/qmetaobject.h>
+#include <QtCore/QSharedPointer>
 
 #include <private/qobject_p.h>
 
@@ -80,8 +81,8 @@ public:
 
     int index() const;
 
-    QDeclarativeExpression *expression() const;
-    QDeclarativeExpression *setExpression(QDeclarativeExpression *);
+    const QSharedPointer<QDeclarativeExpression> &expression() const;
+    QSharedPointer<QDeclarativeExpression> setExpression(QSharedPointer<QDeclarativeExpression> e);
 
     bool isEvaluating() const { return m_isEvaluating; }
 
@@ -91,7 +92,7 @@ protected:
     virtual int qt_metacall(QMetaObject::Call c, int id, void **a);
 
 private:
-    QDeclarativeExpression *m_expression;
+    QSharedPointer<QDeclarativeExpression> m_expression;
     QMetaMethod m_signal;
     bool m_paramsValid : 1;
     bool m_isEvaluating : 1;

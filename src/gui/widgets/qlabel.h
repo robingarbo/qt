@@ -50,6 +50,10 @@ QT_BEGIN_NAMESPACE
 
 QT_MODULE(Gui)
 
+#ifdef Q_WS_MAC
+#define QT_BLIZZARD_LABEL_OPACITY
+#endif
+
 class QLabelPrivate;
 
 class Q_GUI_EXPORT QLabel : public QFrame
@@ -96,6 +100,11 @@ public:
 
     int margin() const;
     void setMargin(int);
+
+#ifdef QT_BLIZZARD_LABEL_OPACITY
+    double labelOpacity() const;
+    void setLabelOpacity(double opacity);
+#endif
 
     bool hasScaledContents() const;
     void setScaledContents(bool);

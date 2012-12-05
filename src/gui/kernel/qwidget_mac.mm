@@ -236,10 +236,14 @@ static void qt_mac_destructView(OSViewRef view)
 {
 #ifdef QT_MAC_USE_COCOA
     NSWindow *window = [view window];
-    if ([window contentView] == view)
-        [window setContentView:[[NSView alloc] initWithFrame:[view bounds]]];
-    [view removeFromSuperview];
-    [view release];
+    if ([window contentView] == view) {
+        NSView* newView = [[NSView alloc] initWithFrame:[view bounds]];
+        [window setContentView:newView];
+        [newView release];
+    } else {
+        [view removeFromSuperview];
+        [view release];
+    }
 #else
     HIViewRemoveFromSuperview(view);
     CFRelease(view);
@@ -293,6 +297,10 @@ bool qt_mac_is_macsheet(const QWidget *w)
     if (!w)
         return false;
 
+#ifdef QT_BLIZZARD_MAC_SHEETS_PATCH
+    if (w->windowType() != Qt::Sheet && QApplication::testAttribute(Qt::AA_MacDontUseSheets))
+        return false;
+#endif
     Qt::WindowModality modality = w->windowModality();
     if (modality == Qt::ApplicationModal)
         return false;

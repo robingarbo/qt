@@ -39,6 +39,9 @@
 **
 ****************************************************************************/
 
+#define QT_BLIZZARD_HIDE_UNDO_REDO
+#define QT_BLIZZARD_DISABLE_CONTROL_CHARACTER_MENU
+
 #include "qtextcontrol_p.h"
 #include "qtextcontrol_p_p.h"
 
@@ -2116,12 +2119,31 @@ QMenu *QTextControl::createStandardContextMenu(const QPointF &pos, QWidget *pare
     QAction *a;
 
     if (d->interactionFlags & Qt::TextEditable) {
+#if defined(QT_BLIZZARD_HIDE_UNDO_REDO)
+        bool addedUndoOrRedo = false;
+        if (d->doc->isUndoAvailable())
+        {
+            a = menu->addAction(tr("&Undo") + ACCEL_KEY(QKeySequence::Undo), this, SLOT(undo()));
+            a->setEnabled(d->doc->isUndoAvailable());
+            addedUndoOrRedo = true;
+        }
+        if (d->doc->isRedoAvailable())
+        {
+            a = menu->addAction(tr("&Redo") + ACCEL_KEY(QKeySequence::Redo), this, SLOT(redo()));
+            a->setEnabled(d->doc->isRedoAvailable());
+            addedUndoOrRedo = true;
+        }
+        if (addedUndoOrRedo)
+        {
+            menu->addSeparator();
+        }
+#else
         a = menu->addAction(tr("&Undo") + ACCEL_KEY(QKeySequence::Undo), this, SLOT(undo()));
         a->setEnabled(d->doc->isUndoAvailable());
         a = menu->addAction(tr("&Redo") + ACCEL_KEY(QKeySequence::Redo), this, SLOT(redo()));
         a->setEnabled(d->doc->isRedoAvailable());
         menu->addSeparator();
-
+#endif // QT_BLIZZARD_HIDE_UNDO_REDO
         a = menu->addAction(tr("Cu&t") + ACCEL_KEY(QKeySequence::Cut), this, SLOT(cut()));
         a->setEnabled(d->cursor.hasSelection());
     }
@@ -2165,6 +2187,7 @@ QMenu *QTextControl::createStandardContextMenu(const QPointF &pos, QWidget *pare
     }
 #endif
 
+#if !defined(QT_BLIZZARD_DISABLE_CONTROL_CHARACTER_MENU)
 #if defined(Q_WS_WIN) || defined(Q_WS_X11)
     if ((d->interactionFlags & Qt::TextEditable) && qt_use_rtl_extensions) {
 #else
@@ -2174,6 +2197,7 @@ QMenu *QTextControl::createStandardContextMenu(const QPointF &pos, QWidget *pare
         QUnicodeControlCharacterMenu *ctrlCharacterMenu = new QUnicodeControlCharacterMenu(this, menu);
         menu->addMenu(ctrlCharacterMenu);
     }
+#endif // !defined QT_BLIZZARD_DISABLE_CONTROL_CHARACTER_MENU
 
     return menu;
 }
